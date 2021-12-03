@@ -1,5 +1,5 @@
 from pygame.sprite import Sprite
-from dino_runner.utils.constants import LARGE_CACTUS, SCREEN_WIDTH
+from dino_runner.utils.constants import SCREEN_WIDTH
 
 
 class Obstacle(Sprite):
