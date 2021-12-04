@@ -6,13 +6,8 @@ class LifeManager:
 
     def new_lifes(self):
         self.life_list = []
-        total_lifes = 3 #Cantidad de vidas
+        total_lifes = 5 #Cantidad de vidas
         pos_x = 30
-
-        # for life in range(0, total_lifes):
-        #     self.life_list.append(Life(pos_x))
-        #     pos_x += 27 #Distancia entre vidas
-
 
         for life in range(0, total_lifes):
             life = Life(pos_x)

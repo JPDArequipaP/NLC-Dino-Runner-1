@@ -11,7 +11,7 @@ class ObstacleManager:
     def __init__(self):
         self.obstacles = []
 
-    def update(self, game):
+    def update(self, game, screen):
         if len(self.obstacles) == 0:
             self.obstacles.append(random.choice([Cactus(SMALL_CACTUS), Cactus(LARGE_CACTUS), Bird(BIRD)]))
 
@@ -21,15 +21,16 @@ class ObstacleManager:
             if game.player.dino_rect.colliderect(obstacle.rect):
                 if not game.player.shield:
                     if game.life_manager.life_counter() == 1:
+                        game.player.draw_dead(screen)
                         game.death_count += 1
-                        pygame.time.delay(500)
                         game.playing = False
                         break
                     else:
                         game.life_manager.delete_life()
                 self.obstacles.remove(obstacle)
 
-            #
+            if game.powerup_manager.hammer.rect.colliderect(obstacle.rect):
+                self.obstacles.remove(obstacle)
 
     def draw(self, screen):
         for obstacle in self.obstacles:

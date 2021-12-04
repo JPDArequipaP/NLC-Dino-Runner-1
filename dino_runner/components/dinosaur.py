@@ -1,7 +1,10 @@
 import pygame
 from pygame.sprite import Sprite
+
+from dino_runner.components.text_utils import get_message
 from dino_runner.utils.constants import RUNNING, DUCKING, JUMPING, DEFAULT_TYPE, SHIELD_TYPE, DUCKING_SHIELD, \
-    RUNNING_SHIELD, JUMPING_SHIELD
+    RUNNING_SHIELD, JUMPING_SHIELD, HAMMER_TYPE, DUCKING_HAMMER, RUNNING_HAMMER, JUMPING_HAMMER, DINO_DEAD, BLACK_COLOR,\
+    WHITE_COLOR
 
 
 class Dinosaur(Sprite):
@@ -11,14 +14,14 @@ class Dinosaur(Sprite):
     JUMP_VEL = 8.5
 
     def __init__(self):
-        self.duck_img = {DEFAULT_TYPE: DUCKING, SHIELD_TYPE: DUCKING_SHIELD}
-        self.run_img = {DEFAULT_TYPE: RUNNING, SHIELD_TYPE: RUNNING_SHIELD}
-        self.jump_img = {DEFAULT_TYPE: JUMPING, SHIELD_TYPE: JUMPING_SHIELD}
+        self.duck_img = {DEFAULT_TYPE: DUCKING, SHIELD_TYPE: DUCKING_SHIELD, HAMMER_TYPE: DUCKING_HAMMER}
+        self.run_img = {DEFAULT_TYPE: RUNNING, SHIELD_TYPE: RUNNING_SHIELD, HAMMER_TYPE: RUNNING_HAMMER}
+        self.jump_img = {DEFAULT_TYPE: JUMPING, SHIELD_TYPE: JUMPING_SHIELD, HAMMER_TYPE: JUMPING_HAMMER}
 
         self.type = DEFAULT_TYPE
 
         self.image = self.run_img[self.type][0]
-
+        self.dead_image = DINO_DEAD
 
         self.dino_rect = self.image.get_rect()
         self.dino_rect.x = self.X_POS
@@ -32,9 +35,10 @@ class Dinosaur(Sprite):
 
     def setup_state_booleans(self):
         self.has_powerup = False
-        self.shield = False
+        self.shield = False #Bandera shield
+        self.hammer = False #Bandera hammer
         self.show_text = False
-        self.shield_time_up = 0
+        self.shield_time_up = 0 #tiempo de shield
 
     def update(self, user_input):
         if self.dino_jump:
@@ -65,7 +69,6 @@ class Dinosaur(Sprite):
 
     def run(self):
         self.image = self.run_img[self.type][self.step_index // 5]
-        #self.image = RUNNING[0] if self.step_index < 5 else RUNNING[1]
         self.dino_rect = self.image.get_rect()
         self.dino_rect.x = self.X_POS
         self.dino_rect.y = self.Y_POS
@@ -74,7 +77,6 @@ class Dinosaur(Sprite):
 
     def duck(self):
         self.image = self.duck_img[self.type][self.step_index // 5]
-        #self.image = DUCKING[0] if self.step_index < 5 else DUCKING[1]
         self.dino_rect = self.image.get_rect()
         self.dino_rect.x = self.X_POS
         self.dino_rect.y = self.Y_POS_DUCK
@@ -85,22 +87,20 @@ class Dinosaur(Sprite):
         if self.dino_jump:
             self.dino_rect.y -= self.jump_vel * 4
             self.jump_vel -= 0.8
-            #print("Y: {}, JUMP_VEL: {}".format(self.dino_rect.y, self.jump_vel))
         if self.jump_vel < -self.JUMP_VEL:
             self.dino_rect.y = self.Y_POS
             self.dino_jump = False
             self.jump_vel = self.JUMP_VEL
 
-    def check_invincibility(self, screen):
+    def check_invincibility(self, screen, dark):
         if self.shield:
             time_to_show = round((self.shield_time_up - pygame.time.get_ticks()) / 100, 2)
             if time_to_show >= 0:
                 if self.show_text:
-                    #ABSTRAER
-                    fond = pygame.font.Font('freesansbold.ttf', 18)
-                    text = fond.render(f"Shield enable for {time_to_show}", True, (0, 0, 0))
-                    text_rect = text.get_rect()
-                    text_rect.center = (500, 40)
+                    if dark:
+                        text, text_rect = get_message(f"Shield enable for {time_to_show}", color=WHITE_COLOR)
+                    else:
+                        text, text_rect = get_message(f"Shield enable for {time_to_show}", color=BLACK_COLOR)
                     screen.blit(text, text_rect)
             else:
                 self.shield = False
@@ -110,3 +110,11 @@ class Dinosaur(Sprite):
     def update_to_default(self, current_type):
         if self.type == current_type:
             self.type = DEFAULT_TYPE
+
+    def draw_dead(self, screen):
+        self.image = self.dead_image
+        self.dino_dead_rect = self.image.get_rect()
+        self.dino_rect.x = self.X_POS
+        self.dino_rect.y = self.Y_POS
+        screen.blit(self.image, (self.dino_rect.x, self.dino_rect.y))
+
